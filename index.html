@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOSPITAL COMMAND NETWORK - Mapa Argentina</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin=""/>
+    
+    <!-- Estilos del mapa -->
+    <link rel="stylesheet" href="map.css">
+</head>
+<body>
+    <div class="map-container">
+        <!-- Botón de retorno al dashboard -->
+        <div class="back-button">
+            <a href="../index.html" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                <span>Volver al Dashboard</span>
+            </a>
+        </div>
+        
+        <!-- Contenedor del mapa -->
+        <div id="mapContainer"></div>
+        
+        <!-- Panel lateral -->
+        <aside class="side-panel">
+            <div class="panel-header">
+                <h2>RED CÓRDOBA</h2>
+                <p class="panel-subtitle">Capital</p>
+                <button class="center-btn" onclick="centerOnCordoba()">
+                    📍 CENTRAR CÓRDOBA
+                </button>
+            </div>
+            
+            <div class="panel-content">
+                <!-- Estadísticas de la red -->
+                <div class="panel-section">
+                    <h3>Estado de la Red</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalHospitals">0</div>
+                            <div class="stat-label">Hospitales</div>
+                        </div>
+                        <div class="stat-item normal">
+                            <div class="stat-value" id="normalHospitals">0</div>
+                            <div class="stat-label">🟢 Normales</div>
+                        </div>
+                        <div class="stat-item warning">
+                            <div class="stat-value" id="warningHospitals">0</div>
+                            <div class="stat-label">🟡 Advertencia</div>
+                        </div>
+                        <div class="stat-item high-demand">
+                            <div class="stat-value" id="highDemandHospitals">0</div>
+                            <div class="stat-label">🟠 Alta Demanda</div>
+                        </div>
+                        <div class="stat-item saturated">
+                            <div class="stat-value" id="saturatedHospitals">0</div>
+                            <div class="stat-label">🔴 Saturados</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recursos disponibles -->
+                <div class="panel-section">
+                    <h3>Recursos Disponibles</h3>
+                    <div class="resource-stats">
+                        <div class="resource-item">
+                            <span class="resource-label">🛏️ Camas</span>
+                            <span class="resource-value" id="availableBeds">0</span>
+                        </div>
+                        <div class="resource-item">
+                            <span class="resource-label">🏥 Camas Críticas</span>
+                            <span class="resource-value" id="availableCriticalBeds">0</span>
+                        </div>
+                        <div class="resource-item">
+                            <span class="resource-label">🚑 Ambulancias</span>
+                            <span class="resource-value" id="availableAmbulances">0</span>
+                        </div>
+                        <div class="resource-item">
+                            <span class="resource-label">📊 Ocupación Promedio</span>
+                            <span class="resource-value" id="averageOccupation">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Buscador -->
+                <div class="panel-section">
+                    <h3>Buscar</h3>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-input" placeholder="Buscar hospital o localidad...">
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+                </div>
+                
+                <!-- Filtros -->
+                <div class="panel-section">
+                    <h3>Filtros</h3>
+                    <div class="filter-group">
+                        <label class="filter-label">Estado del Hospital</label>
+                        <select id="statusFilter" class="filter-select">
+                            <option value="all">Todos los estados</option>
+                            <option value="NORMAL">🟢 Normal</option>
+                            <option value="ADVERTENCIA">🟡 Advertencia</option>
+                            <option value="ALTA DEMANDA">🟠 Alta Demanda</option>
+                            <option value="SATURADO">🔴 Saturado</option>
+                            <option value="FUERA DE SERVICIO">⚫ Fuera de Servicio</option>
+                        </select>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <input type="checkbox" id="toggleHospitals" checked>
+                            <label for="toggleHospitals">Mostrar Hospitales</label>
+                        </div>
+                        <div class="toggle-item">
+                            <input type="checkbox" id="toggleCities" checked>
+                            <label for="toggleCities">Mostrar Ciudades</label>
+                        </div>
+                        <div class="toggle-item">
+                            <input type="checkbox" id="toggleRoutes" checked>
+                            <label for="toggleRoutes">Mostrar Rutas</label>
+                        </div>
+                        <div class="toggle-item">
+                            <input type="checkbox" id="toggleProvinces" checked>
+                            <label for="toggleProvinces">Mostrar Provincias</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accesos rápidos -->
+                <div class="panel-section">
+                    <h3>Accesos Rápidos</h3>
+                    <div class="quick-links">
+                        <a href="../emergencies.html" class="quick-link">🚨 Central de Emergencias</a>
+                        <a href="../simulation.html" class="quick-link">▶ Simulación Activa</a>
+                    </div>
+                </div>
+
+                <!-- Información -->
+                <div class="panel-section">
+                    <h3>Información</h3>
+                    <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.5;">
+                        Mapa de monitoreo hospitalario de la República Argentina. 
+                        Sistema de coordinación y visualización de la red hospitalaria nacional.
+                    </p>
+                </div>
+            </div>
+        </aside>
+    </div>
+    
+    <!-- Panel de detalle de hospital -->
+    <div id="hospitalDetailPanel">
+        <!-- El contenido se genera dinámicamente -->
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+            crossorigin=""></script>
+    
+    <!-- Datos de hospitales -->
+    <script src="../js/hospitals.js"></script>
+    <script src="../js/network-expansion.js"></script>
+    <script src="../js/shared-state.js"></script>
+    <script src="../js/risk-engine.js"></script>
+    <script src="../js/emergency-engine.js"></script>
+    
+    <!-- Lógica del mapa -->
+    <script src="map.js"></script>
+</body>
+</html>

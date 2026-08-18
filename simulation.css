@@ -1,0 +1,802 @@
+/* ===================================
+   HOSPITAL COMMAND NETWORK - CAPA 4
+   INTERFAZ DE SIMULACIÓN
+   =================================== */
+
+/* Variables de Simulación */
+:root {
+    --sim-bg: #0a0e27;
+    --sim-card: #16213e;
+    --sim-border: #2a3f5f;
+    --sim-text: #e4e9f0;
+    --sim-text-muted: #8892b0;
+    --sim-accent: #ff006e;
+    --sim-success: #00ff88;
+    --sim-warning: #ffd60a;
+    --sim-danger: #ff006e;
+    --sim-info: #0ea5e9;
+}
+
+/* Layout de Simulación */
+.simulation-view {
+    background: var(--sim-bg);
+    color: var(--sim-text);
+    min-height: 100vh;
+}
+
+/* Header de Simulación */
+.simulation-header {
+    background: var(--sim-card);
+    border-bottom: 3px solid var(--sim-accent);
+    padding: 1.5rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(255, 0, 110, 0.3);
+}
+
+.simulation-header-content {
+    max-width: 1920px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.simulation-title-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.simulation-emergency-icon {
+    font-size: 2rem;
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+.simulation-title-info h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--sim-accent);
+    letter-spacing: 1px;
+}
+
+.simulation-subtitle {
+    font-size: 0.875rem;
+    color: var(--sim-text-muted);
+    margin-top: 0.25rem;
+}
+
+.simulation-status-section {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.simulation-time-display {
+    text-align: center;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 0, 110, 0.1);
+    border: 2px solid var(--sim-accent);
+    border-radius: 8px;
+}
+
+.time-label {
+    font-size: 0.75rem;
+    color: var(--sim-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.time-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--sim-accent);
+    font-family: 'Courier New', monospace;
+}
+
+.network-status-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: rgba(0, 255, 136, 0.1);
+    border: 2px solid var(--sim-success);
+    border-radius: 8px;
+}
+
+.network-status-indicator.warning {
+    background: rgba(255, 214, 10, 0.1);
+    border-color: var(--sim-warning);
+}
+
+.network-status-indicator.danger {
+    background: rgba(255, 0, 110, 0.1);
+    border-color: var(--sim-danger);
+}
+
+.network-status-indicator .status-icon {
+    font-size: 1.5rem;
+}
+
+.network-status-indicator .status-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.25rem;
+}
+
+.simulation-state-badge {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.simulation-state-badge.active {
+    background: rgba(255, 0, 110, 0.2);
+    border: 2px solid var(--sim-accent);
+    color: var(--sim-accent);
+}
+
+.simulation-state-badge.paused {
+    background: rgba(255, 214, 10, 0.2);
+    border: 2px solid var(--sim-warning);
+    color: var(--sim-warning);
+}
+
+.simulation-state-badge.ready {
+    background: rgba(0, 255, 136, 0.2);
+    border: 2px solid var(--sim-success);
+    color: var(--sim-success);
+}
+
+.simulation-state-badge.completed {
+    background: rgba(136, 146, 176, 0.2);
+    border: 2px solid var(--sim-text-muted);
+    color: var(--sim-text-muted);
+}
+
+/* Controles de Simulación */
+.simulation-controls {
+    background: var(--sim-card);
+    border: 1px solid var(--sim-border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 2rem;
+    max-width: 1920px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--sim-card);
+    border: 2px solid var(--sim-border);
+    border-radius: 8px;
+    color: var(--sim-text);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--sim-accent);
+    transform: translateY(-2px);
+}
+
+.control-btn.primary {
+    background: var(--sim-accent);
+    border-color: var(--sim-accent);
+    color: white;
+}
+
+.control-btn.primary:hover {
+    background: #ff1a7a;
+}
+
+.control-btn.danger {
+    background: rgba(255, 0, 110, 0.2);
+    border-color: var(--sim-danger);
+    color: var(--sim-danger);
+}
+
+.control-btn.danger:hover {
+    background: rgba(255, 0, 110, 0.3);
+}
+
+.control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.speed-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--sim-border);
+}
+
+.speed-label {
+    font-size: 0.875rem;
+    color: var(--sim-text-muted);
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.speed-btn {
+    padding: 0.5rem 1rem;
+    background: var(--sim-card);
+    border: 2px solid var(--sim-border);
+    border-radius: 6px;
+    color: var(--sim-text);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.speed-btn.active {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: var(--sim-success);
+    color: var(--sim-success);
+}
+
+.speed-btn:hover:not(.active) {
+    border-color: var(--sim-accent);
+}
+
+/* Container Principal */
+.simulation-container {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+}
+
+/* Área Principal */
+.simulation-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Dashboard de Métricas */
+.simulation-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.metric-card {
+    background: var(--sim-card);
+    border: 1px solid var(--sim-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.metric-card.critical-card {
+    border-left: 4px solid var(--sim-danger);
+    background: linear-gradient(135deg, rgba(255, 0, 110, 0.05), var(--sim-card));
+}
+
+.metric-card.warning-card {
+    border-left: 4px solid var(--sim-warning);
+    background: linear-gradient(135deg, rgba(255, 214, 10, 0.05), var(--sim-card));
+}
+
+.metric-card.success-card {
+    border-left: 4px solid var(--sim-success);
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), var(--sim-card));
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: var(--sim-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--sim-text);
+}
+
+.metric-value.critical {
+    color: var(--sim-danger);
+}
+
+.metric-value.warning {
+    color: var(--sim-warning);
+}
+
+.metric-value.success {
+    color: var(--sim-success);
+}
+
+.metric-subtitle {
+    font-size: 0.875rem;
+    color: var(--sim-text-muted);
+}
+
+/* Mapa de Simulación */
+.simulation-map-section {
+    background: var(--sim-card);
+    border: 2px solid var(--sim-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.simulation-map-header {
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--sim-border);
+}
+
+.simulation-map-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sim-accent);
+    letter-spacing: 0.5px;
+}
+
+.simulation-map-container {
+    width: 100%;
+    height: 500px;
+}
+
+/* Gráficos */
+.simulation-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.chart-card {
+    background: var(--sim-card);
+    border: 1px solid var(--sim-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.chart-header {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chart-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sim-text);
+    margin: 0;
+}
+
+.chart-legend {
+    display: flex;
+    gap: 1rem;
+}
+
+.legend-item {
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.legend-item.critical { color: var(--sim-danger); }
+.legend-item.moderate { color: #ff9900; }
+.legend-item.minor { color: var(--sim-success); }
+.legend-item.beds { color: var(--sim-info); }
+.legend-item.critical-beds { color: var(--sim-danger); }
+
+.chart-info {
+    font-size: 0.75rem;
+    color: var(--sim-text-muted);
+}
+
+.chart-container {
+    width: 100%;
+    height: 200px;
+    position: relative;
+}
+
+.chart-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* Panel de Situación */
+.situation-panel {
+    background: var(--sim-card);
+    border: 2px solid var(--sim-border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.situation-header {
+    padding: 1rem 1.5rem;
+    background: rgba(0, 234, 233, 0.1);
+    border-bottom: 2px solid var(--sim-info);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.situation-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sim-info);
+    letter-spacing: 0.5px;
+}
+
+.situation-timestamp {
+    font-size: 0.75rem;
+    color: var(--sim-text-muted);
+    font-family: 'Courier New', monospace;
+}
+
+.situation-content {
+    padding: 1.5rem;
+}
+
+.situation-status {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 4px solid var(--sim-info);
+    border-radius: 4px;
+}
+
+.situation-content p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+    color: var(--sim-text);
+}
+
+.situation-content .highlight {
+    color: var(--sim-accent);
+    font-weight: 600;
+}
+
+.situation-content .emergency-link {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 0, 110, 0.1);
+    border: 2px solid var(--sim-accent);
+    border-radius: 8px;
+    color: var(--sim-accent);
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.situation-content .emergency-link:hover {
+    background: rgba(255, 0, 110, 0.2);
+    transform: translateY(-2px);
+}
+
+.situation-status.ready {
+    border-color: var(--sim-warning);
+}
+
+/* Sidebar Derecha */
+.simulation-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Alertas */
+.alerts-panel {
+    background: var(--sim-card);
+    border: 2px solid var(--sim-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.alerts-header {
+    padding: 1rem 1.5rem;
+    background: rgba(255, 0, 110, 0.1);
+    border-bottom: 2px solid var(--sim-accent);
+}
+
+.alerts-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sim-accent);
+    letter-spacing: 0.5px;
+}
+
+.alerts-count {
+    font-size: 0.75rem;
+    color: var(--sim-text-muted);
+}
+
+.alerts-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.alert-item {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--sim-border);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    transition: background 0.2s ease;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.alert-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.alert-item:last-child {
+    border-bottom: none;
+}
+
+.alert-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-time {
+    font-size: 0.75rem;
+    color: var(--sim-text-muted);
+    font-family: 'Courier New', monospace;
+}
+
+.alert-message {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    margin-top: 0.25rem;
+}
+
+.alert-item.critical .alert-message {
+    color: var(--sim-danger);
+    font-weight: 600;
+}
+
+.alert-item.warning .alert-message {
+    color: var(--sim-warning);
+    font-weight: 600;
+}
+
+.no-alerts {
+    padding: 2rem;
+    text-align: center;
+    color: var(--sim-text-muted);
+}
+
+/* Línea de Tiempo */
+.timeline-panel {
+    background: var(--sim-card);
+    border: 1px solid var(--sim-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.timeline-header {
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--sim-border);
+}
+
+.timeline-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sim-text);
+    letter-spacing: 0.5px;
+}
+
+.timeline-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.timeline-event {
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    transition: background 0.2s ease;
+}
+
+.timeline-event:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.event-time {
+    color: var(--sim-text-muted);
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.event-message {
+    color: var(--sim-text);
+    line-height: 1.4;
+}
+
+.no-events {
+    padding: 2rem;
+    text-align: center;
+    color: var(--sim-text-muted);
+}
+
+/* Hospitales Afectados */
+.hospitals-status-panel {
+    background: var(--sim-card);
+    border: 1px solid var(--sim-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.hospitals-status-header {
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--sim-border);
+}
+
+.hospitals-status-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sim-text);
+    letter-spacing: 0.5px;
+}
+
+.hospitals-status-list {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.hospital-status-item {
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 3px solid;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.hospital-status-item.normal { border-color: var(--sim-success); }
+.hospital-status-item.warning { border-color: var(--sim-warning); }
+.hospital-status-item.high-demand { border-color: #ff9900; }
+.hospital-status-item.saturated { border-color: var(--sim-danger); }
+
+.hospital-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.hospital-occupancy {
+    color: var(--sim-text-muted);
+    font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+    .simulation-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .simulation-sidebar {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .simulation-header-content {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .simulation-status-section {
+        flex-direction: column;
+        width: 100%;
+        gap: 1rem;
+    }
+    
+    .simulation-controls {
+        flex-direction: column;
+    }
+    
+    .speed-controls {
+        border-left: none;
+        border-top: 2px solid var(--sim-border);
+        padding-left: 0;
+        padding-top: 1rem;
+    }
+    
+    .simulation-metrics {
+        grid-template-columns: 1fr;
+    }
+    
+    .simulation-charts {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animaciones de carga */
+.loading-simulation {
+    text-align: center;
+    padding: 3rem;
+    color: var(--sim-text-muted);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 0, 110, 0.2);
+    border-top-color: var(--sim-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

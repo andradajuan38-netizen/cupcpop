@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOSPITAL COMMAND NETWORK - Gestión Hospitalaria</title>
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/hospital.css">
+</head>
+<body class="hospital-view">
+    <!-- Header del Hospital -->
+    <header class="hospital-header">
+        <div class="header-top">
+            <a href="map/index.html" class="back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                <span>Volver a la Red</span>
+            </a>
+            <div class="header-brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21h18M5 21V7l8-4 8 4v14M8 21v-4h8v4"></path>
+                </svg>
+                <span>HOSPITAL COMMAND</span>
+            </div>
+            <div class="simulated-badge">
+                <span>⚠️ DATOS SIMULADOS</span>
+            </div>
+        </div>
+        <div class="header-main">
+            <div class="hospital-title">
+                <h1 id="hospitalName">HOSPITAL CENTRAL</h1>
+                <div class="hospital-location">
+                    <span>📍 <span id="hospitalLocation">Córdoba, Córdoba</span></span>
+                </div>
+            </div>
+            <div class="hospital-status-badge">
+                <div id="hospitalStatusBadge" class="status-indicator normal">
+                    <span class="status-dot"></span>
+                    <span class="status-text">OPERACIÓN NORMAL</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="hospital-container">
+        <!-- Sidebar Izquierda -->
+        <aside class="hospital-sidebar">
+            <!-- Estado General del Hospital -->
+            <section class="sidebar-section">
+                <h3 class="section-title">ESTADO DEL HOSPITAL</h3>
+                <div class="general-status">
+                    <div class="status-item">
+                        <span class="status-label">Estado actual</span>
+                        <div id="currentStatus" class="status-value normal">🟢 NORMAL</div>
+                    </div>
+                    <div class="status-metrics">
+                        <div class="metric-row">
+                            <span class="metric-label">Ocupación general</span>
+                            <span id="generalOccupancy" class="metric-value">0%</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Guardia</span>
+                            <span id="emergencyOccupancy" class="metric-value">0%</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Camas críticas</span>
+                            <span id="criticalOccupancy" class="metric-value">0%</span>
+                        </div>
+                        <div class="metric-row">
+                            <span class="metric-label">Personal disponible</span>
+                            <span id="staffAvailability" class="metric-value">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Indicador de Riesgo -->
+            <section class="sidebar-section">
+                <h3 class="section-title">RIESGO OPERATIVO</h3>
+                <div id="riskIndicator" class="risk-indicator low">
+                    <div class="risk-icon">🟢</div>
+                    <div class="risk-level">BAJO</div>
+                    <div class="risk-score" id="riskScore">0</div>
+                </div>
+            </section>
+
+            <!-- Alertas Operativas -->
+            <section class="sidebar-section">
+                <h3 class="section-title">⚠️ ALERTAS OPERATIVAS</h3>
+                <div id="alertsContainer" class="alerts-container">
+                    <div class="no-alerts">
+                        <span>✓ Sin alertas operativas</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Botón de Simulación (Deshabilitado) -->
+            <section class="sidebar-section">
+                <button class="simulation-btn" disabled>
+                    <span class="btn-icon">🚨</span>
+                    <span class="btn-text">SIMULACIÓN</span>
+                    <span class="btn-subtitle">Disponible próximamente</span>
+                </button>
+            </section>
+        </aside>
+
+        <!-- Contenido Principal -->
+        <div class="hospital-content">
+            <!-- Resumen Superior -->
+            <section class="summary-cards">
+                <div class="summary-card">
+                    <div class="card-icon">🛏️</div>
+                    <div class="card-content">
+                        <div class="card-label">Camas Disponibles</div>
+                        <div class="card-value" id="bedsAvailable">0</div>
+                        <div class="card-percentage" id="bedsPercentage">0%</div>
+                    </div>
+                    <div class="card-status" id="bedsStatus">normal</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="card-icon">🏥</div>
+                    <div class="card-content">
+                        <div class="card-label">Camas Críticas</div>
+                        <div class="card-value" id="criticalBedsAvailable">0</div>
+                        <div class="card-percentage" id="criticalBedsPercentage">0%</div>
+                    </div>
+                    <div class="card-status" id="criticalBedsStatus">normal</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="card-icon">🚨</div>
+                    <div class="card-content">
+                        <div class="card-label">Guardia</div>
+                        <div class="card-value" id="guardiaOccupancy">0%</div>
+                        <div class="card-subtitle" id="guardiaPatients">0 pacientes</div>
+                    </div>
+                    <div class="card-status" id="guardiaStatus">normal</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="card-icon">👨‍⚕️</div>
+                    <div class="card-content">
+                        <div class="card-label">Personal</div>
+                        <div class="card-value" id="staffAvailable">0</div>
+                        <div class="card-percentage" id="staffPercentage">0%</div>
+                    </div>
+                    <div class="card-status" id="staffStatus">normal</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="card-icon">🔬</div>
+                    <div class="card-content">
+                        <div class="card-label">Quirófanos</div>
+                        <div class="card-value" id="operatingRoomsAvailable">0</div>
+                        <div class="card-subtitle" id="operatingRoomsTotal">de 0</div>
+                    </div>
+                    <div class="card-status" id="operatingRoomsStatus">normal</div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="card-icon">🚑</div>
+                    <div class="card-content">
+                        <div class="card-label">Ambulancias</div>
+                        <div class="card-value" id="ambulancesAvailable">0</div>
+                        <div class="card-subtitle" id="ambulancesTotal">de 0</div>
+                    </div>
+                    <div class="card-status" id="ambulancesStatus">normal</div>
+                </div>
+            </section>
+
+            <!-- Módulos Principales -->
+            <div class="modules-grid">
+                <!-- Módulo de Camas -->
+                <section class="module-card">
+                    <h3 class="module-title">🛏️ CAPACIDAD DE CAMAS</h3>
+                    <div class="module-content">
+                        <div class="capacity-stats">
+                            <div class="stat-row">
+                                <span class="stat-label">Totales</span>
+                                <span class="stat-value" id="bedsTotalStat">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Ocupadas</span>
+                                <span class="stat-value" id="bedsOccupiedStat">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Disponibles</span>
+                                <span class="stat-value highlight" id="bedsAvailableStat">0</span>
+                            </div>
+                        </div>
+                        <div class="progress-section">
+                            <div class="progress-label">
+                                <span>Ocupación</span>
+                                <span id="bedsOccupancyPercent">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="bedsOccupancyBar" class="progress-fill normal" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="subsection">
+                            <h4 class="subsection-title">CAMAS CRÍTICAS</h4>
+                            <div class="capacity-stats">
+                                <div class="stat-row">
+                                    <span class="stat-label">Totales</span>
+                                    <span class="stat-value" id="criticalBedsTotalStat">0</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Ocupadas</span>
+                                    <span class="stat-value" id="criticalBedsOccupiedStat">0</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Disponibles</span>
+                                    <span class="stat-value highlight" id="criticalBedsAvailableStat">0</span>
+                                </div>
+                            </div>
+                            <div class="progress-section">
+                                <div class="progress-label">
+                                    <span>Ocupación</span>
+                                    <span id="criticalBedsOccupancyPercent">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div id="criticalBedsOccupancyBar" class="progress-fill normal" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Módulo de Guardia -->
+                <section class="module-card">
+                    <h3 class="module-title">🚨 GUARDIA</h3>
+                    <div class="module-content">
+                        <div class="guardia-chart">
+                            <div class="chart-container">
+                                <svg id="guardiaChart" width="200" height="200" viewBox="0 0 200 200">
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="#1a1a2e" stroke-width="20"/>
+                                    <circle id="guardiaChartFill" cx="100" cy="100" r="80" fill="none" stroke="#00ff88" stroke-width="20"
+                                            stroke-dasharray="502.4" stroke-dashoffset="502.4" 
+                                            transform="rotate(-90 100 100)" stroke-linecap="round"/>
+                                    <text x="100" y="95" text-anchor="middle" font-size="32" font-weight="bold" fill="#00ff88" id="guardiaChartText">0%</text>
+                                    <text x="100" y="115" text-anchor="middle" font-size="12" fill="#8892b0">OCUPACIÓN</text>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="guardia-stats">
+                            <div class="stat-row">
+                                <span class="stat-label">Pacientes en espera</span>
+                                <span class="stat-value" id="guardiaPatientsWaiting">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Pacientes en atención</span>
+                                <span class="stat-value" id="guardiaPatientsInCare">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Pacientes críticos</span>
+                                <span class="stat-value critical" id="guardiaPatientsCritical">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Tiempo promedio espera</span>
+                                <span class="stat-value" id="guardiaWaitTime">0 min</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Módulo de Personal -->
+                <section class="module-card">
+                    <h3 class="module-title">👨‍⚕️ PERSONAL</h3>
+                    <div class="module-content">
+                        <div class="staff-distribution">
+                            <div class="staff-bar">
+                                <div id="staffAvailableBar" class="staff-segment available" style="width: 0%">
+                                    <span class="segment-label">Disponible</span>
+                                </div>
+                                <div id="staffBusyBar" class="staff-segment busy" style="width: 0%">
+                                    <span class="segment-label">En servicio</span>
+                                </div>
+                                <div id="staffUnavailableBar" class="staff-segment unavailable" style="width: 0%">
+                                    <span class="segment-label">No disponible</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="staff-stats">
+                            <div class="stat-row">
+                                <span class="stat-label">Médicos</span>
+                                <span class="stat-value" id="staffDoctors">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Enfermeros</span>
+                                <span class="stat-value" id="staffNurses">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Personal total</span>
+                                <span class="stat-value" id="staffTotalStat">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Disponible</span>
+                                <span class="stat-value highlight" id="staffAvailableStat">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Porcentaje disponible</span>
+                                <span class="stat-value" id="staffAvailablePercent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Módulo de Quirófanos -->
+                <section class="module-card">
+                    <h3 class="module-title">🔬 QUIRÓFANOS</h3>
+                    <div class="module-content">
+                        <div class="operating-rooms-grid" id="operatingRoomsGrid">
+                            <!-- Se genera dinámicamente -->
+                        </div>
+                        <div class="operating-stats">
+                            <div class="stat-row">
+                                <span class="stat-label">Total</span>
+                                <span class="stat-value" id="operatingRoomsTotalStat">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">En uso</span>
+                                <span class="stat-value" id="operatingRoomsInUse">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Disponibles</span>
+                                <span class="stat-value highlight" id="operatingRoomsAvailableStat">0</span>
+                            </div>
+                        </div>
+                        <div class="operating-status">
+                            <span>Estado: </span>
+                            <span id="operatingRoomsStatusText" class="status-badge normal">🟢 Disponibles</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Módulo de Ambulancias -->
+                <section class="module-card">
+                    <h3 class="module-title">🚑 AMBULANCIAS</h3>
+                    <div class="module-content">
+                        <div class="ambulances-grid" id="ambulancesGrid">
+                            <!-- Se genera dinámicamente -->
+                        </div>
+                        <div class="ambulance-stats">
+                            <div class="stat-row">
+                                <span class="stat-label">Total</span>
+                                <span class="stat-value" id="ambulancesTotalStat">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Disponibles</span>
+                                <span class="stat-value highlight" id="ambulancesAvailableStat">0</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">En servicio</span>
+                                <span class="stat-value" id="ambulancesInService">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Módulo de Insumos -->
+                <section class="module-card">
+                    <h3 class="module-title">📦 INSUMOS</h3>
+                    <div class="module-content">
+                        <div class="supplies-list">
+                            <div class="supply-item">
+                                <div class="supply-header">
+                                    <span class="supply-name">Medicamentos</span>
+                                    <span class="supply-percentage" id="supplyMedicationsPercent">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div id="supplyMedicationsBar" class="progress-fill normal" style="width: 0%"></div>
+                                </div>
+                                <span id="supplyMedicationsStatus" class="supply-status">🟢 Suficiente</span>
+                            </div>
+
+                            <div class="supply-item">
+                                <div class="supply-header">
+                                    <span class="supply-name">Material quirúrgico</span>
+                                    <span class="supply-percentage" id="supplySurgicalPercent">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div id="supplySurgicalBar" class="progress-fill normal" style="width: 0%"></div>
+                                </div>
+                                <span id="supplySurgicalStatus" class="supply-status">🟢 Suficiente</span>
+                            </div>
+
+                            <div class="supply-item">
+                                <div class="supply-header">
+                                    <span class="supply-name">Oxígeno</span>
+                                    <span class="supply-percentage" id="supplyOxygenPercent">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div id="supplyOxygenBar" class="progress-fill normal" style="width: 0%"></div>
+                                </div>
+                                <span id="supplyOxygenStatus" class="supply-status">🟢 Suficiente</span>
+                            </div>
+
+                            <div class="supply-item">
+                                <div class="supply-header">
+                                    <span class="supply-name">Material descartable</span>
+                                    <span class="supply-percentage" id="supplyDisposablePercent">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div id="supplyDisposableBar" class="progress-fill normal" style="width: 0%"></div>
+                                </div>
+                                <span id="supplyDisposableStatus" class="supply-status">🟢 Suficiente</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Módulo de Áreas -->
+                <section class="module-card full-width">
+                    <h3 class="module-title">🏥 ÁREAS DEL HOSPITAL</h3>
+                    <div class="module-content">
+                        <div class="areas-grid">
+                            <div class="area-card">
+                                <div class="area-icon">🚨</div>
+                                <div class="area-name">GUARDIA</div>
+                                <div class="area-status" id="areaGuardiaStatus">🟢 Normal</div>
+                                <div class="area-occupancy" id="areaGuardiaOccupancy">0%</div>
+                            </div>
+
+                            <div class="area-card">
+                                <div class="area-icon">🛏️</div>
+                                <div class="area-name">INTERNACIÓN</div>
+                                <div class="area-status" id="areaInternacionStatus">🟢 Normal</div>
+                                <div class="area-occupancy" id="areaInternacionOccupancy">0%</div>
+                            </div>
+
+                            <div class="area-card">
+                                <div class="area-icon">❤️</div>
+                                <div class="area-name">UCI</div>
+                                <div class="area-status" id="areaUCIStatus">🟢 Normal</div>
+                                <div class="area-occupancy" id="areaUCIOccupancy">0%</div>
+                            </div>
+
+                            <div class="area-card">
+                                <div class="area-icon">🔬</div>
+                                <div class="area-name">QUIRÓFANOS</div>
+                                <div class="area-status" id="areaQuirofanosStatus">🟢 Normal</div>
+                                <div class="area-occupancy" id="areaQuirofanosOccupancy">0%</div>
+                            </div>
+
+                            <div class="area-card">
+                                <div class="area-icon">🩺</div>
+                                <div class="area-name">CONSULTORIOS</div>
+                                <div class="area-status" id="areaConsultoriosStatus">🟢 Normal</div>
+                                <div class="area-occupancy" id="areaConsultoriosOccupancy">0%</div>
+                            </div>
+
+                            <div class="area-card">
+                                <div class="area-icon">🚑</div>
+                                <div class="area-name">EMERGENCIAS</div>
+                                <div class="area-status" id="areaEmergenciasStatus">🟢 Normal</div>
+                                <div class="area-occupancy" id="areaEmergenciasOccupancy">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/hospitals.js"></script>
+    <script src="js/network-expansion.js"></script>
+    <script src="js/shared-state.js"></script>
+    <script src="js/risk-engine.js"></script>
+    <script src="js/emergency-engine.js"></script>
+    <script src="js/hospital-detail.js"></script>
+</body>
+</html>

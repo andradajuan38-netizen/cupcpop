@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOSPITAL COMMAND NETWORK - Central de Emergencias</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin=""/>
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/emergency.css">
+</head>
+<body class="emergency-view">
+    <!-- Header -->
+    <header class="emergency-header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="map/index.html" class="back-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    <span>Volver a la Red</span>
+                </a>
+                <div class="header-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <h1>CENTRAL DE EMERGENCIAS</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="system-status" id="systemStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">SISTEMA OPERATIVO</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="emergency-container">
+        <!-- Estado del Sistema -->
+        <section class="system-overview">
+            <div class="overview-card">
+                <div class="card-icon">🚨</div>
+                <div class="card-content">
+                    <div class="card-label">Emergencias Activas</div>
+                    <div class="card-value" id="activeEmergenciesCount">0</div>
+                </div>
+            </div>
+            <div class="overview-card">
+                <div class="card-icon">📋</div>
+                <div class="card-content">
+                    <div class="card-label">Última Emergencia</div>
+                    <div class="card-value small" id="lastEmergency">Ninguna</div>
+                </div>
+            </div>
+            <div class="overview-card">
+                <div class="card-icon">📊</div>
+                <div class="card-content">
+                    <div class="card-label">Total Historial</div>
+                    <div class="card-value" id="totalEmergencies">0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Emergencia Activa (oculta inicialmente) -->
+        <section class="active-emergency-section" id="activeEmergencySection" style="display: none;">
+            <div class="active-emergency-header">
+                <h2>🚨 EMERGENCIA ACTIVA</h2>
+                <button class="btn-secondary" onclick="clearEmergency()">Finalizar Emergencia</button>
+            </div>
+            <div id="activeEmergencyContent">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Botón Nueva Emergencia -->
+        <section class="create-emergency-section" id="createEmergencySection">
+            <button class="btn-primary-large" onclick="showEmergencyWizard()">
+                <span class="btn-icon">+</span>
+                <span class="btn-text">NUEVA EMERGENCIA</span>
+            </button>
+        </section>
+
+        <!-- Wizard de Emergencia (oculto inicialmente) -->
+        <section class="emergency-wizard" id="emergencyWizard" style="display: none;">
+            <div class="wizard-header">
+                <h2>CONFIGURAR NUEVA EMERGENCIA</h2>
+                <button class="btn-icon-only" onclick="cancelEmergencyWizard()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="wizard-content">
+                <!-- Paso 1: Tipo de Emergencia -->
+                <div class="wizard-step">
+                    <h3 class="step-title">1. TIPO DE EMERGENCIA</h3>
+                    <div class="emergency-types-grid" id="emergencyTypes">
+                        <div class="emergency-type-card" data-type="earthquake">
+                            <div class="type-icon">🌎</div>
+                            <div class="type-name">TERREMOTO</div>
+                            <div class="type-description">Evento sísmico que puede provocar múltiples víctimas, daños estructurales y pérdida de capacidad hospitalaria.</div>
+                        </div>
+                        <div class="emergency-type-card" data-type="flood">
+                            <div class="type-icon">🌊</div>
+                            <div class="type-name">INUNDACIÓN</div>
+                            <div class="type-description">Desborde de agua que afecta áreas habitadas, dificultando el acceso y causando víctimas.</div>
+                        </div>
+                        <div class="emergency-type-card" data-type="fire">
+                            <div class="type-icon">🔥</div>
+                            <div class="type-name">INCENDIO</div>
+                            <div class="type-description">Fuego incontrolado en área urbana o forestal que genera víctimas por inhalación y quemaduras.</div>
+                        </div>
+                        <div class="emergency-type-card" data-type="explosion">
+                            <div class="type-icon">💥</div>
+                            <div class="type-name">EXPLOSIÓN</div>
+                            <div class="type-description">Detonación que causa múltiples heridos con traumatismos, quemaduras y lesiones por onda expansiva.</div>
+                        </div>
+                        <div class="emergency-type-card" data-type="mass-accident">
+                            <div class="type-icon">🚗</div>
+                            <div class="type-name">ACCIDENTE MASIVO</div>
+                            <div class="type-description">Colisión múltiple vehicular que genera gran cantidad de heridos simultáneos.</div>
+                        </div>
+                        <div class="emergency-type-card" data-type="industrial">
+                            <div class="type-icon">🏭</div>
+                            <div class="type-name">ACCIDENTE INDUSTRIAL</div>
+                            <div class="type-description">Incidente en instalación industrial con potencial de intoxicaciones y trauma múltiple.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 2: Ubicación -->
+                <div class="wizard-step">
+                    <h3 class="step-title">2. UBICACIÓN</h3>
+                    <div class="location-selector">
+                        <label class="form-label">Localidad</label>
+                        <select id="locationSelect" class="form-select">
+                            <option value="">Seleccionar ubicación...</option>
+                            <option value="alta-gracia" data-lat="-31.6529" data-lon="-64.4283">Alta Gracia</option>
+                            <option value="anisacate" data-lat="-31.6833" data-lon="-64.4500">Anisacate</option>
+                            <option value="villa-del-prado" data-lat="-31.6333" data-lon="-64.4000">Villa del Prado</option>
+                            <option value="despeñaderos" data-lat="-31.9167" data-lon="-64.3833">Despeñaderos</option>
+                            <option value="rafael-garcia" data-lat="-31.7000" data-lon="-64.4500">Rafael García</option>
+                            <option value="los-cedros" data-lat="-31.7000" data-lon="-64.4167">Los Cedros</option>
+                            <option value="falda-del-carmen" data-lat="-31.6833" data-lon="-64.4333">Falda del Carmen</option>
+                            <option value="la-bolsa" data-lat="-31.6500" data-lon="-64.4500">La Bolsa</option>
+                            <option value="valle-anisacate" data-lat="-31.7167" data-lon="-64.4667">Valle de Anisacate</option>
+                            <option value="malagueno" data-lat="-31.5667" data-lon="-64.3667">Malagueño</option>
+                            <option value="villa-carlos-paz" data-lat="-31.4167" data-lon="-64.5000">Villa Carlos Paz</option>
+                            <option value="cordoba" data-lat="-31.4201" data-lon="-64.1888">Córdoba Capital</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Paso 3: Radio de Afectación -->
+                <div class="wizard-step">
+                    <h3 class="step-title">3. RADIO DE AFECTACIÓN</h3>
+                    <div class="radius-selector">
+                        <div class="radius-options">
+                            <button class="radius-btn" data-radius="1">1 km</button>
+                            <button class="radius-btn" data-radius="3">3 km</button>
+                            <button class="radius-btn" data-radius="5">5 km</button>
+                            <button class="radius-btn" data-radius="10">10 km</button>
+                            <button class="radius-btn" data-radius="20">20 km</button>
+                        </div>
+                        <div class="radius-custom">
+                            <label class="form-label">Personalizado (km)</label>
+                            <input type="number" id="customRadius" class="form-input" min="1" max="50" placeholder="Ingresá el radio...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 4: Nivel de Gravedad -->
+                <div class="wizard-step">
+                    <h3 class="step-title">4. NIVEL DE GRAVEDAD</h3>
+                    <div class="severity-selector">
+                        <div class="severity-card" data-severity="low">
+                            <div class="severity-icon">🟢</div>
+                            <div class="severity-name">BAJO</div>
+                            <div class="severity-description">Evento limitado con pocas víctimas (~20 pacientes)</div>
+                        </div>
+                        <div class="severity-card" data-severity="moderate">
+                            <div class="severity-icon">🟡</div>
+                            <div class="severity-name">MODERADO</div>
+                            <div class="severity-description">Evento significativo con múltiples víctimas (~50 pacientes)</div>
+                        </div>
+                        <div class="severity-card" data-severity="high">
+                            <div class="severity-icon">🟠</div>
+                            <div class="severity-name">ALTO</div>
+                            <div class="severity-description">Evento grave con gran cantidad de víctimas (~100 pacientes)</div>
+                        </div>
+                        <div class="severity-card" data-severity="critical">
+                            <div class="severity-icon">🔴</div>
+                            <div class="severity-name">CRÍTICO</div>
+                            <div class="severity-description">Catástrofe masiva con víctimas múltiples (~200 pacientes)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 5: Parámetros del Evento -->
+                <div class="wizard-step">
+                    <h3 class="step-title">5. PARÁMETROS DEL EVENTO</h3>
+                    <div id="eventParameters" class="event-parameters">
+                        <!-- Se genera dinámicamente según el tipo -->
+                    </div>
+                    <div class="event-parameters">
+                        <div class="parameter-field">
+                            <label class="form-label" for="estimatedDuration">Duración estimada (minutos)</label>
+                            <input type="number" id="estimatedDuration" class="form-input" min="1" value="60">
+                        </div>
+                        <div class="parameter-field">
+                            <label class="form-label" for="estimatedAffected">Afectados estimados</label>
+                            <input type="number" id="estimatedAffected" class="form-input" readonly value="0">
+                        </div>
+                        <div class="parameter-field">
+                            <label class="form-label" for="eventDateTime">Fecha y hora del evento</label>
+                            <input type="datetime-local" id="eventDateTime" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen y Mapa -->
+                <div class="wizard-step">
+                    <h3 class="step-title">6. RESUMEN Y VISUALIZACIÓN</h3>
+                    <div class="summary-grid">
+                        <div class="summary-panel">
+                            <h4 class="panel-title">IMPACTO ESTIMADO</h4>
+                            <div class="impact-stats">
+                                <div class="impact-stat">
+                                    <span class="stat-label">Pacientes Totales</span>
+                                    <span class="stat-value" id="estimatedTotal">0</span>
+                                </div>
+                                <div class="impact-stat critical">
+                                    <span class="stat-label">Críticos</span>
+                                    <span class="stat-value" id="estimatedCritical">0</span>
+                                </div>
+                                <div class="impact-stat moderate">
+                                    <span class="stat-label">Moderados</span>
+                                    <span class="stat-value" id="estimatedModerate">0</span>
+                                </div>
+                                <div class="impact-stat minor">
+                                    <span class="stat-label">Leves</span>
+                                    <span class="stat-value" id="estimatedMinor">0</span>
+                                </div>
+                                <div class="impact-stat">
+                                    <span class="stat-label">Ambulancias Requeridas</span>
+                                    <span class="stat-value" id="estimatedAmbulances">0</span>
+                                </div>
+                            </div>
+
+                            <h4 class="panel-title">HOSPITALES EN ZONA DE IMPACTO</h4>
+                            <div id="affectedHospitalsList" class="hospitals-list">
+                                <!-- Se genera dinámicamente -->
+                            </div>
+
+                            <h4 class="panel-title">HOSPITALES DISPONIBLES</h4>
+                            <div id="availableHospitalsList" class="hospitals-list">
+                                <!-- Se genera dinámicamente -->
+                            </div>
+                        </div>
+
+                        <div class="map-panel">
+                            <div id="emergencyMap" class="emergency-map-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-footer">
+                <button class="btn-secondary" onclick="cancelEmergencyWizard()">Cancelar</button>
+                <button class="btn-primary" id="createEmergencyBtn" onclick="createEmergency()">
+                    ▶ PREPARAR EMERGENCIA
+                </button>
+            </div>
+        </section>
+
+        <!-- Historial -->
+        <section class="history-section">
+            <h2 class="section-title">HISTORIAL DE EMERGENCIAS</h2>
+            <div id="emergencyHistory" class="history-grid">
+                <div class="no-history">
+                    <span>No hay emergencias registradas</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+            crossorigin=""></script>
+    <script src="js/hospitals-emergency.js"></script>
+    <script src="js/network-expansion.js"></script>
+    <script src="js/shared-state.js"></script>
+    <script src="js/emergency-engine.js"></script>
+    <script src="js/emergency.js"></script>
+</body>
+</html>

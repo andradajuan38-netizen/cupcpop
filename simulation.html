@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOSPITAL COMMAND NETWORK - Centro de Comando de Emergencias</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin=""/>
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/simulation.css">
+</head>
+<body class="simulation-view">
+    <!-- Header de Emergencia -->
+    <header class="simulation-header">
+        <div class="simulation-header-content">
+            <div class="simulation-title-section">
+                <div class="simulation-emergency-icon">🚨</div>
+                <div class="simulation-title-info">
+                    <h1>HOSPITAL COMMAND NETWORK</h1>
+                    <div class="simulation-subtitle" id="simulationSubtitle">
+                        SIMULACIÓN: TERREMOTO — ALTA GRACIA
+                    </div>
+                </div>
+            </div>
+            <div class="simulation-status-section">
+                <div class="simulation-time-display">
+                    <div class="time-label">TIEMPO TRANSCURRIDO</div>
+                    <div class="time-value" id="simulationTimeDisplay">T+ 00:00</div>
+                </div>
+                <div class="network-status-indicator" id="networkStatusIndicator">
+                    <div class="status-icon">🟢</div>
+                    <div class="status-text">RED ESTABLE</div>
+                </div>
+                <div class="simulation-state-badge active" id="simulationStateBadge">
+                    ● SIMULACIÓN ACTIVA
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Controles de Simulación -->
+    <div class="simulation-controls">
+        <button class="control-btn primary" id="playPauseBtn" onclick="togglePlayPause()">
+            <span id="playPauseIcon">▶</span>
+            <span id="playPauseText">INICIAR</span>
+        </button>
+        <button class="control-btn" onclick="pauseSimulation()" id="pauseBtn">
+            ⏸ PAUSAR
+        </button>
+        <button class="control-btn" onclick="advanceSimulationManual(5)">
+            ⏭ +5 MIN
+        </button>
+        <button class="control-btn" onclick="advanceSimulationManual(10)">
+            ⏩ +10 MIN
+        </button>
+        <button class="control-btn" onclick="resetSimulationUI()">
+            🔄 REINICIAR
+        </button>
+        <button class="control-btn danger" onclick="finishSimulationUI()">
+            ⏹ FINALIZAR
+        </button>
+        <a class="control-btn" href="index.html">
+            ↩ VOLVER AL INDEX
+        </a>
+        
+        <div class="speed-controls">
+            <div class="speed-label">VELOCIDAD:</div>
+            <button class="speed-btn active" data-speed="x1" onclick="setSpeed('x1')">×1</button>
+            <button class="speed-btn" data-speed="x2" onclick="setSpeed('x2')">×2</button>
+            <button class="speed-btn" data-speed="x5" onclick="setSpeed('x5')">×5</button>
+            <button class="speed-btn" data-speed="x10" onclick="setSpeed('x10')">×10</button>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <main class="simulation-container">
+        <!-- Área Principal -->
+        <div class="simulation-main">
+            <!-- Métricas Principales -->
+            <section class="simulation-metrics">
+                <div class="metric-card">
+                    <div class="metric-label">🏥 Hospitales Monitoreados</div>
+                    <div class="metric-value" id="metricHospitalsTotal">8</div>
+                    <div class="metric-subtitle">En la red</div>
+                </div>
+
+                <div class="metric-card critical-card">
+                    <div class="metric-label">🚨 Hospitales Afectados</div>
+                    <div class="metric-value critical" id="metricHospitalsAffected">0</div>
+                    <div class="metric-subtitle">En zona de impacto</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-label">👥 Pacientes Generados</div>
+                    <div class="metric-value" id="metricPatients">0</div>
+                    <div class="metric-subtitle" id="metricPatientsProgress">0% del total estimado</div>
+                </div>
+
+                <div class="metric-card critical-card">
+                    <div class="metric-label">🔴 Pacientes Críticos</div>
+                    <div class="metric-value critical" id="metricCritical">0</div>
+                    <div class="metric-subtitle" id="metricCriticalRate">0/min</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-label">🛏️ Camas Disponibles</div>
+                    <div class="metric-value" id="metricBeds">0</div>
+                    <div class="metric-subtitle">En toda la red</div>
+                </div>
+
+                <div class="metric-card critical-card">
+                    <div class="metric-label">🛏️ Camas Críticas</div>
+                    <div class="metric-value critical" id="metricCriticalBeds">0</div>
+                    <div class="metric-subtitle">UCI disponibles</div>
+                </div>
+
+                <div class="metric-card warning-card">
+                    <div class="metric-label">🚨 Hospitales Saturados</div>
+                    <div class="metric-value warning" id="metricSaturated">0</div>
+                    <div class="metric-subtitle">Al límite de capacidad</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-label">📊 Ocupación de Red</div>
+                    <div class="metric-value" id="metricNetworkOccupancy">0%</div>
+                    <div class="metric-subtitle" id="metricNetworkStatus">Red estable</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-label">💊 Recursos Disponibles</div>
+                    <div class="metric-value" id="metricResources">0%</div>
+                    <div class="metric-subtitle">Insumos promedio</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-label">⏱️ Tiempo de Simulación</div>
+                    <div class="metric-value" id="metricSimulationTime">00:00</div>
+                    <div class="metric-subtitle" id="metricSimulationSpeed">Velocidad x1</div>
+                </div>
+            </section>
+
+            <!-- Mapa -->
+            <section class="simulation-map-section">
+                <div class="simulation-map-header">
+                    <h3>🗺️ ESTADO DE LA RED HOSPITALARIA</h3>
+                </div>
+                <div id="simulationMap" class="simulation-map-container"></div>
+            </section>
+
+            <!-- Gráficos -->
+            <section class="simulation-charts">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4 class="chart-title">📈 Evolución de Pacientes por Gravedad</h4>
+                        <div class="chart-legend">
+                            <span class="legend-item critical">🔴 Críticos</span>
+                            <span class="legend-item moderate">🟠 Moderados</span>
+                            <span class="legend-item minor">🟢 Leves</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="patientsChart" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4 class="chart-title">📊 Ocupación Hospitalaria (%)</h4>
+                        <div class="chart-info">Tiempo real</div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="occupancyChart" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4 class="chart-title">🛏️ Camas Disponibles vs Críticas</h4>
+                        <div class="chart-legend">
+                            <span class="legend-item beds">🔵 Generales</span>
+                            <span class="legend-item critical-beds">🔴 Críticas</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="bedsChart" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h4 class="chart-title">🏥 Estado de la Red Hospitalaria</h4>
+                        <div class="chart-info">Capacidad total</div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="networkChart" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel de Situación General -->
+            <section class="situation-panel">
+                <div class="situation-header">
+                    <h3>📋 SITUACIÓN ACTUAL</h3>
+                    <div class="situation-timestamp" id="situationTimestamp">Actualizado: --:--</div>
+                </div>
+                <div class="situation-content" id="situationContent">
+                    <p class="situation-status">⏸ SIMULACIÓN LISTA</p>
+                    <p>Configure la emergencia y presione INICIAR para comenzar la simulación.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="simulation-sidebar">
+            <!-- Alertas -->
+            <div class="alerts-panel">
+                <div class="alerts-header">
+                    <h3>⚠️ ALERTAS</h3>
+                    <div class="alerts-count" id="alertsCount">0 alertas activas</div>
+                </div>
+                <div class="alerts-list" id="alertsList">
+                    <div class="no-alerts">Sin alertas</div>
+                </div>
+            </div>
+
+            <!-- Línea de Tiempo -->
+            <div class="timeline-panel">
+                <div class="timeline-header">
+                    <h3>📋 LÍNEA DE TIEMPO</h3>
+                </div>
+                <div class="timeline-list" id="timelineList">
+                    <div class="no-events">Sin eventos</div>
+                </div>
+            </div>
+
+            <!-- Hospitales Afectados -->
+            <div class="hospitals-status-panel">
+                <div class="hospitals-status-header">
+                    <h3>🏥 ESTADO DE HOSPITALES</h3>
+                </div>
+                <div class="hospitals-status-list" id="hospitalsStatusList">
+                    <!-- Se genera dinámicamente -->
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+            crossorigin=""></script>
+    <script src="js/hospitals-simulation.js"></script>
+    <script src="js/network-expansion.js"></script>
+    <script src="js/shared-state.js"></script>
+    <script src="js/risk-engine.js"></script>
+    <script src="js/emergency-engine.js"></script>
+    <script src="js/simulation-rules.js"></script>
+    <script src="js/simulation-state.js"></script>
+    <script src="js/patients.js"></script>
+    <script src="js/simulation-engine.js"></script>
+    <script src="js/simulation-ui.js"></script>
+</body>
+</html>
